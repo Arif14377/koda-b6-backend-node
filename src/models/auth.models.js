@@ -1,6 +1,7 @@
 import * as db from '../../db/index.js'
 import * as hash from '../lib/hash.js'
 import crypto from "crypto"
+import jwt from 'jsonwebtoken'
 
 export async function register(dataUser) {
     // cek db apakah email sudah terdaftar
@@ -75,12 +76,12 @@ export async function login(dataLogin) {
     // jika benar -> return 200 + data
     if (isPasswordTrue) {
         // create jwt
-        const token = jwt.Sign({userId: data.id}, process.env.JWT_SECRET, {expiresIn: '1h'})
+        const token = jwt.sign({userId: data.id}, process.env.JWT_SECRET, {expiresIn: '1h'})
 
         return {
             message: "Successfully loged in.",
             code: 200,
-            data: {...data, }
+            data: {...data, token}
         }
     }
 }
