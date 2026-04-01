@@ -35,14 +35,25 @@ export async function register(req, res) {
         password: dataRegistration.password
     }
 
-    const result = await authModels.register(dataUser)
-
-    if (result.code == 200) {
+    try {
+        const result = await authModels.register(dataUser)
+        console.log(result)
+        
+        if (result.code == 200) {
+            res
+                .status(constants.HTTP_STATUS_OK)
+                .json({
+                    success: true,
+                    message: "Registrasi berhasil"
+                })
+        }
+    } catch(error) {
         res
-            .status(constants.HTTP_STATUS_OK)
+            .status(constants.HTTP_STATUS_CONFLICT)
             .json({
-                success: true,
-                message: "Registrasi berhasil"
+                success: false,
+                error: error.message
             })
     }
+
 }
