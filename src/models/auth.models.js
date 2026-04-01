@@ -35,3 +35,46 @@ export async function register(dataUser) {
     
     return results
 }
+
+export async function login(dataLogin) {
+    // cari email apakah terdaftar, jika tidak -> return 401 unauthorized
+    const text = `
+        SELECT
+        id,
+        full_name,
+        email,
+        password,
+        address,
+        phone,
+        picture,
+        role_id
+        FROM users
+        WHERE email = $1
+    `
+    const result = await db.query(text, dataLogin.email)
+    if (result.rowCount !== 1) {
+        return {
+            message: "Invalid email or password",
+            code: 401
+        }
+    }
+    
+    // cek password, jika salah -> return 401 unauthorized
+    const data = result.rows[0]
+    const isPasswordTrue = await hash.verifyHash(data.password, dataLogin.password)
+    if (!isPasswordTrue) {
+        return {
+            message: "Invalid email or password",
+            code: 401
+        }
+    }
+
+    // jika benar -> return 200 + data
+    if (isPasswordTrue) {
+        return {
+            message: "Successfully loged in.",
+            code: 200,
+            data
+        }
+    }
+}

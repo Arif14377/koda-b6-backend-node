@@ -73,7 +73,7 @@ export async function login(req, res) {
     }
 
     // Kirim body request untuk dicek di logic models
-    const result = authModels.login(dataLogin)
+    const result = await authModels.login(dataLogin)
 
     // jika result.code respon 404, user tidak ditemukan
     if (result.code == 404) {
@@ -81,7 +81,7 @@ export async function login(req, res) {
             .status(constants.HTTP_STATUS_UNAUTHORIZED)
             .json({
                 success: false,
-                error: "Invalid email or password."
+                error: result.mesaage
             })
         return
     }
@@ -92,7 +92,7 @@ export async function login(req, res) {
             .status(constants.HTTP_STATUS_UNAUTHORIZED)
             .json({
                 success: false,
-                error: "Invalid or password."
+                error: result.message
             })
         return
     }
