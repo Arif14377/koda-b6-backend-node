@@ -51,30 +51,36 @@ export async function login(dataLogin) {
         FROM users
         WHERE email = $1
     `
-    const result = await db.query(text, dataLogin.email)
+    const result = await db.query(text, [dataLogin.email])
     if (result.rowCount !== 1) {
         return {
-            message: "Invalid email or password",
+            message: "Invalid email or password1",
             code: 401
         }
     }
     
     // cek password, jika salah -> return 401 unauthorized
+
     const data = result.rows[0]
+
     const isPasswordTrue = await hash.verifyHash(data.password, dataLogin.password)
+
     if (!isPasswordTrue) {
         return {
-            message: "Invalid email or password",
+            message: "Invalid email or password2",
             code: 401
         }
     }
 
     // jika benar -> return 200 + data
     if (isPasswordTrue) {
+        // create jwt
+        const token = jwt.Sign({userId: data.id}, process.env.JWT_SECRET, {expiresIn: '1h'})
+
         return {
             message: "Successfully loged in.",
             code: 200,
-            data
+            data: {...data, }
         }
     }
 }

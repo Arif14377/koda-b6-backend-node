@@ -27,6 +27,11 @@ npm install pg
 npm i argon2
 ```
 
+6. jsonwebtoken
+```bash
+npm install jsonwebtoken
+```
+
 ## Buat Struktur Folder
 
 
