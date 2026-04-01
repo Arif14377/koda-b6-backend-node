@@ -1,7 +1,7 @@
 # Langkah-langkah development aplikasi
 berikut adalah langkah-langkah dalam pengembangan aplikasi backend ini.
 
-# Setup library
+## Setup library
 1. Express js
 ```bash
 npm install express --save
@@ -17,5 +17,20 @@ npm init .
 npm install dotenv
 ```
 
-# Buat Struktur Folder
+4. pg node (koneksi database)
+```bash
+npm install pg
+```
 
+5. argon2 (hashing password)
+```bash
+npm i argon2
+```
+
+## Buat Struktur Folder
+
+
+## Setup koneksi backend dengan express
+
+
+## Koneksi db dengan pg
