@@ -57,3 +57,54 @@ export async function register(req, res) {
     }
 
 }
+
+export async function login(req, res) {
+    const dataLogin = req.body
+
+    // cek format email
+    if (!dataLogin.email.includes("@")) {
+        res
+            .status(constants.HTTP_STATUS_BAD_REQUEST)
+            .json({
+                success: false,
+                error: "Email tidak valid."
+            })
+        return
+    }
+
+    // Kirim body request untuk dicek di logic models
+    const result = authModels.login(dataLogin)
+
+    // jika result.code respon 404, user tidak ditemukan
+    if (result.code == 404) {
+        res
+            .status(constants.HTTP_STATUS_UNAUTHORIZED)
+            .json({
+                success: false,
+                error: "Invalid email or password."
+            })
+        return
+    }
+
+    // jika result.code respon 401, password salah
+    if (result.code == 401) {
+        res
+            .status(constants.HTTP_STATUS_UNAUTHORIZED)
+            .json({
+                success: false,
+                error: "Invalid or password."
+            })
+        return
+    }
+
+    // Jika berhasil (result.code == 200), kembalikan data + token
+    if (result.code == 200) {
+        res
+            .status(constants.HTTP_STATUS_OK)
+            .json({
+                success: true,
+                message: "Login berhasil.",
+                results: result.data
+            })
+    }
+}
