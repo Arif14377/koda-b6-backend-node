@@ -85,3 +85,49 @@ export async function login(dataLogin) {
         }
     }
 }
+
+export async function generateOTP(email) {
+    const OTPGenerated = Math.floor(100000 + Math.random() *900000).toString();
+    if (!OTPGenerated) {
+        return {
+            success: false,
+            message: "an error occurred while generating the OTP code."
+        }
+    }
+    
+    let isOTPSaved;
+    if (OTPGenerated) {
+        const text1 = `
+            SELECT email from forgot_password WHERE email = $1
+        `
+        const isEmailExist = await db.query(text1, [email])
+
+        if (isEmailExist.rowCount) {
+            const text2 = `
+                UPDATE forgot_password SET code = $1 WHERE email = $2
+            `
+            isOTPSaved = await db.query(text2, [OTPGenerated, email])
+            
+        } else {
+            const text2 = `
+                INSERT INTO forgot_password(email, code) VALUES($1, $2)
+            `
+            isOTPSaved = await db.query(text2, [email, OTPGenerated])
+
+        }
+    }
+
+    if (!isOTPSaved) {
+        return {
+            success: false,
+            message: "an error occurred while generating the OTP code"
+        }
+    }
+
+    console.log(OTPGenerated)
+    
+    return {
+        success: true,
+        message: "OTP code successfully sent to email."
+    }
+}

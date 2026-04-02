@@ -108,3 +108,38 @@ export async function login(req, res) {
             })
     }
 }
+
+export async function generateOTP(req, res) {
+    const {email} = req.body
+
+    // cek format email
+    if (!email.includes("@")) {
+        res
+            .status(constants.HTTP_STATUS_BAD_REQUEST)
+            .json({
+                success: false,
+                error: "Invalid email format."
+            })
+        return
+    }
+
+    // buat otp
+    const isOTPGenerated = await authModels.generateOTP(email)
+
+    if (!isOTPGenerated.success) {
+        res
+            .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+            .json({
+                success: false,
+                error: isOTPGenerated.message
+            })
+        return
+    }
+
+    res
+        .status(constants.HTTP_STATUS_OK)
+        .json({
+            success: true,
+            message: isOTPGenerated.message
+        })
+}
