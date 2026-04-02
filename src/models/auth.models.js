@@ -19,7 +19,7 @@ export async function register(dataUser) {
 
     // Jika belum terdaftar, hash password
     const hashPassword = await hash.generateHash(dataUser.password)
-    console.log("hashPassword: ", hashPassword)
+    // console.log("hashPassword: ", hashPassword)
 
     // simpan data user ke db
     const textQuery2 = `
@@ -155,5 +155,31 @@ export async function verificationOTP(email, otp) {
     return {
         ok: true,
         message: "OTP successfully verified."
+    }
+}
+
+export async function changePassword(email, newPassword) {
+
+    // TODO: cek password harus string
+    try{
+        if (typeof(newPassword) != "string") {
+            throw new Error("Password must be a string")
+        }
+        const hashPassword = await hash.generateHash(newPassword)
+
+        const text = `
+            UPDATE users SET password = $1 WHERE email = $2
+        `
+        const isPasswordChanged = await db.query(text, [hashPassword, email])
+
+        return {
+            ok: true,
+            message: "Password changed successfully"
+        }
+    } catch(error) {
+        return {
+            ok: false,
+            message: error.message
+        }
     }
 }

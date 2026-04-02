@@ -165,3 +165,25 @@ export async function verificationOTP(req, res) {
             message: isOTP.message
         })
 }
+
+export async function changePassword(req, res) {
+    const {email, newPassword} = req.body
+
+    const isPasswordChanged = await authModels.changePassword(email, newPassword)
+    if (!isPasswordChanged.ok) {
+        res
+            .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+            .json({
+                success: false,
+                error: isPasswordChanged.message
+            })
+        return
+    }
+
+    res
+        .status(constants.HTTP_STATUS_OK)
+        .json({
+            success: true,
+            message: isPasswordChanged.message
+        })
+}
