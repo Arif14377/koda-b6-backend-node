@@ -143,3 +143,25 @@ export async function generateOTP(req, res) {
             message: isOTPGenerated.message
         })
 }
+
+export async function verificationOTP(req, res) {
+    const {email, otp} = req.body
+
+    const isOTP = await authModels.verificationOTP(email, parseInt(otp))
+    if (!isOTP.ok) {
+        res
+            .status(constants.HTTP_STATUS_UNAUTHORIZED)
+            .json({
+                success: "false",
+                error: isOTP.message
+            })
+        return
+    }
+    
+    res
+        .status(constants.HTTP_STATUS_OK)
+        .json({
+            success: true,
+            message: isOTP.message
+        })
+}

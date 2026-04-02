@@ -131,3 +131,29 @@ export async function generateOTP(email) {
         message: "OTP code successfully sent to email."
     }
 }
+
+export async function verificationOTP(email, otp) {
+    const text = `
+        SELECT email, code FROM forgot_password WHERE email = $1
+    `
+    const forgotUser = await db.query(text, [email])
+
+    if (forgotUser.rowCount == 0) {
+        return {
+            ok: false,
+            message: "OTP is not valid"
+        }
+    }
+
+    if (forgotUser.rows[0].code !== otp) {
+        return {
+            ok: false,
+            message: "OTP is not valid."
+        }
+    }
+
+    return {
+        ok: true,
+        message: "OTP successfully verified."
+    }
+}
