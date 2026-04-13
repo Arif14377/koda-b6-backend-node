@@ -19,3 +19,23 @@ export async function getAllProducts(req, res) {
         })
     }
 }
+
+export async function getReviews(req, res) {
+    try {
+        const reviews = await mainModels.getReviews()
+        console.log(reviews)
+
+        res.statuCode = 200
+        res.json({
+            success: true,
+            message: "List reviews data",
+            results: reviews
+        })
+    } catch (error) {
+        res.statusCode = 500
+        res.json({
+            success: false,
+            error: error.message
+        })
+    }
+}

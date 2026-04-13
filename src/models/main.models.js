@@ -14,3 +14,19 @@ export async function getAllProducts() {
     console.log(dataProducts)
     return dataProducts.rows
 }
+
+export async function getReviews() {
+    const text=`
+        SELECT users.full_name, reviews.messages, reviews.rating, users.picture
+		FROM reviews
+		INNER JOIN users ON reviews.user_id = users.id
+    `
+
+    try {
+        const reviews = await db.query(text)
+        return reviews.rows
+    } catch(error) {
+        throw new Error("Failed to get reviews data: ", error.message)
+    }
+    
+}
