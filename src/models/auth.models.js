@@ -10,7 +10,7 @@ export async function register(dataUser) {
     `
 
     const res = await db.query(textQuery1, [dataUser.email] )
-    console.log(res)
+    // console.log(res)
 
     // Jika sudah terdaftar, throw error
     if (res.rowCount == 1) {
@@ -63,6 +63,12 @@ export async function login(dataLogin) {
     // cek password, jika salah -> return 401 unauthorized
 
     const data = result.rows[0]
+    // console.log(data)
+    const dataResponse = {
+        id: data.id,
+        fullName: data.full_name,
+        email: data.email,
+    }
 
     const isPasswordTrue = await hash.verifyHash(data.password, dataLogin.password)
 
@@ -73,7 +79,7 @@ export async function login(dataLogin) {
         }
     }
 
-    // jika benar -> return 200 + data
+    // jika benar -> re        // const dataResponse = turn 200 + data
     if (isPasswordTrue) {
         // create jwt
         const token = jwt.sign({userId: data.id}, process.env.JWT_SECRET, {expiresIn: '1h'})
@@ -81,54 +87,35 @@ export async function login(dataLogin) {
         return {
             message: "Successfully loged in.",
             code: 200,
-            data: {...data, token}
+            data: {...dataResponse, token}
         }
     }
 }
 
-export async function generateOTP(email) {
-    const OTPGenerated = Math.floor(100000 + Math.random() *900000).toString();
-    if (!OTPGenerated) {
-        return {
-            success: false,
-            message: "an error occurred while generating the OTP code."
-        }
-    }
-    
-    let isOTPSaved;
-    if (OTPGenerated) {
-        const text1 = `
-            SELECT email from forgot_password WHERE email = $1
-        `
-        const isEmailExist = await db.query(text1, [email])
+export async function saveOTP(email, otp) {
+    const text1 = `
+        SELECT email from forgot_password WHERE email = $1
+    `
+    const emailExists = await db.query(text1, [email])
+    // console.log(emailExists)
 
-        if (isEmailExist.rowCount) {
-            const text2 = `
-                UPDATE forgot_password SET code = $1 WHERE email = $2
-            `
-            isOTPSaved = await db.query(text2, [OTPGenerated, email])
-            
-        } else {
-            const text2 = `
-                INSERT INTO forgot_password(email, code) VALUES($1, $2)
-            `
-            isOTPSaved = await db.query(text2, [email, OTPGenerated])
-
+    if (emailExists.rowCount == 0) {
+        try{
+            const text = `INSERT INTO forgot_password(email, code) VALUES($1, $2)` 
+            await db.query(text, [email, otp])
+            return
+        } catch (error) {
+            throw new Error("Failed to save forgot_password", error.message)
         }
     }
 
-    if (!isOTPSaved) {
-        return {
-            success: false,
-            message: "an error occurred while generating the OTP code"
+    if (emailExists.rowCount != 0) {
+        try{
+            const text = `UPDATE forgot_password SET code = $1 WHERE email = $2`
+            await db.query(text, [otp, email])
+        } catch (error) {
+            throw new Error("Failed to save forgot_password", error.message)
         }
-    }
-
-    console.log(OTPGenerated)
-    
-    return {
-        success: true,
-        message: "OTP code successfully sent to email."
     }
 }
 
@@ -136,50 +123,51 @@ export async function verificationOTP(email, otp) {
     const text = `
         SELECT email, code FROM forgot_password WHERE email = $1
     `
-    const forgotUser = await db.query(text, [email])
 
-    if (forgotUser.rowCount == 0) {
-        return {
-            ok: false,
-            message: "OTP is not valid"
+    // coba cari email dan code otp
+    try {
+        const forgotUser = await db.query(text, [email])
+        if (forgotUser.rowCount == 0) {
+            throw new Error("Error while verify otp.")
         }
-    }
 
-    if (forgotUser.rows[0].code !== otp) {
-        return {
-            ok: false,
-            message: "OTP is not valid."
+        // jika otp tidak sesuai
+        console.log("from table: ", forgotUser.rows[0].code)
+        console.log("from body: ", otp)
+        if (forgotUser.rows[0].code !== otp) {
+            throw new Error("Invalid OTP code.")
         }
-    }
 
-    return {
-        ok: true,
-        message: "OTP successfully verified."
+        // jika otp sesuai
+        if (forgotUser.rows[0].code === otp) {
+            return {
+                ok: true,
+                message: "OTP successfully verified."
+            }
+        }
+
+    } catch (error) {
+        console.error(error.message)
+        return
     }
 }
 
 export async function changePassword(email, newPassword) {
-
-    // TODO: cek password harus string
     try{
-        if (typeof(newPassword) != "string") {
-            throw new Error("Password must be a string")
-        }
+        console.log("tipe new password: ", typeof(newPassword))
         const hashPassword = await hash.generateHash(newPassword)
 
         const text = `
             UPDATE users SET password = $1 WHERE email = $2
         `
-        const isPasswordChanged = await db.query(text, [hashPassword, email])
+        await db.query(text, [hashPassword, email])
 
         return {
             ok: true,
-            message: "Password changed successfully"
+            message: "Successfully changed password"
         }
+
     } catch(error) {
-        return {
-            ok: false,
-            message: error.message
-        }
+        console.error(error.message)
     }
 }

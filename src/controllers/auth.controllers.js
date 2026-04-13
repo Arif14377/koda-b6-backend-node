@@ -1,29 +1,26 @@
 import * as authModels from '../models/auth.models.js'
-import {constants} from "node:http2"
 
 export async function register(req, res) {
     const dataRegistration = req.body
+    console.log("dataRegister: ", dataRegistration)
 
     // Cek apakah format email benar
     if (!dataRegistration.email.includes("@")) {
-        res
-            .status(constants.HTTP_STATUS_BAD_REQUEST)
-            .json({
-                success: false,
-                error: "Format email salah",
-            })
-
+        res.statusCode = 400
+        res.json({
+            success: false,
+            error: "Format email salah",
+        })
         return
     }
 
     // Cek apakah password dan confirm password sama
     if (dataRegistration.password !== dataRegistration.confirmPassword) {
-        res
-            .status(constants.HTTP_STATUS_BAD_REQUEST)
-            .json({
-                success: false,
-                error: "Password tidak sama."
-            })
+        res.statusCode = 400
+        res.json({
+            success: false,
+            error: "Password tidak sama."
+        })
 
         return
     }
@@ -40,20 +37,18 @@ export async function register(req, res) {
         console.log(result)
         
         if (result.code == 200) {
-            res
-                .status(constants.HTTP_STATUS_OK)
-                .json({
-                    success: true,
-                    message: "Registrasi berhasil"
-                })
+            res.statusCode = 200
+            res.json({
+                success: true,
+                message: "Registrasi berhasil"
+            })
         }
     } catch(error) {
-        res
-            .status(constants.HTTP_STATUS_CONFLICT)
-            .json({
-                success: false,
-                error: error.message
-            })
+        res.statusCode = 409
+        res.json({
+            success: false,
+            error: error.message
+        })
     }
 
 }
@@ -63,12 +58,11 @@ export async function login(req, res) {
 
     // cek format email
     if (!dataLogin.email.includes("@")) {
-        res
-            .status(constants.HTTP_STATUS_BAD_REQUEST)
-            .json({
-                success: false,
-                error: "Email tidak valid."
-            })
+        res.statusCode = 400
+        res.json({
+            success: false,
+            error: "Email tidak valid."
+        })
         return
     }
 
@@ -77,35 +71,32 @@ export async function login(req, res) {
 
     // jika result.code respon 404, user tidak ditemukan
     if (result.code == 404) {
-        res
-            .status(constants.HTTP_STATUS_UNAUTHORIZED)
-            .json({
-                success: false,
-                error: result.mesaage
-            })
+        res.statusCode = 401
+        res.json({
+            success: false,
+            error: result.message
+        })
         return
     }
 
     // jika result.code respon 401, password salah
     if (result.code == 401) {
-        res
-            .status(constants.HTTP_STATUS_UNAUTHORIZED)
-            .json({
-                success: false,
-                error: result.message
-            })
+        res.statusCode = 401
+        res.json({
+            success: false,
+            error: result.message
+        })
         return
     }
 
     // Jika berhasil (result.code == 200), kembalikan data + token
     if (result.code == 200) {
-        res
-            .status(constants.HTTP_STATUS_OK)
-            .json({
-                success: true,
-                message: "Login berhasil.",
-                results: result.data
-            })
+        res.statusCode = 200
+        res.json({
+            success: true,
+            message: "Login berhasil.",
+            results: result.data
+        })
     }
 }
 
@@ -114,76 +105,90 @@ export async function generateOTP(req, res) {
 
     // cek format email
     if (!email.includes("@")) {
-        res
-            .status(constants.HTTP_STATUS_BAD_REQUEST)
-            .json({
-                success: false,
-                error: "Invalid email format."
-            })
+        res.statusCode = 400
+        res.json({
+            success: false,
+            error: "Invalid email format."
+        })
         return
     }
 
     // buat otp
-    const isOTPGenerated = await authModels.generateOTP(email)
-
-    if (!isOTPGenerated.success) {
-        res
-            .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-            .json({
-                success: false,
-                error: isOTPGenerated.message
-            })
+    const OTPGenerated = Math.floor(100000 + Math.random() *900000).toString();
+    if (!OTPGenerated) {
+        res.statusCode = 500
+        res.json({
+            success: false,
+            error: "an error occurred while generating the OTP code."
+        })
         return
     }
 
-    res
-        .status(constants.HTTP_STATUS_OK)
-        .json({
+    // save otp di database
+    try {
+        await authModels.saveOTP(email, OTPGenerated)
+
+        console.log(OTPGenerated)
+        res.statusCode = 200
+        res.json({
             success: true,
-            message: isOTPGenerated.message
+            message: "OTP sent successfully (on console)"
         })
+    } catch (error) {
+        console.error(error.message)
+
+        res.statusCode = 500
+        res.json({
+            success: false,
+            error: error.message
+        })
+    }
+
 }
 
 export async function verificationOTP(req, res) {
     const {email, otp} = req.body
 
-    const isOTP = await authModels.verificationOTP(email, parseInt(otp))
-    if (!isOTP.ok) {
-        res
-            .status(constants.HTTP_STATUS_UNAUTHORIZED)
-            .json({
-                success: "false",
-                error: isOTP.message
+    try {
+        console.log("from body controllers: ", otp)
+        const OTPValid = await authModels.verificationOTP(email, parseInt(otp))
+
+        if (OTPValid.ok) {
+            res.statusCode = 200
+            res.json({
+                success: true,
+                message: OTPValid.message
             })
-        return
+        }
+    } catch (error) {
+        res.statusCode = 401
+        res.json({
+            success: false,
+            error: error.message
+        })
     }
     
-    res
-        .status(constants.HTTP_STATUS_OK)
-        .json({
-            success: true,
-            message: isOTP.message
-        })
 }
 
 export async function changePassword(req, res) {
     const {email, newPassword} = req.body
 
-    const isPasswordChanged = await authModels.changePassword(email, newPassword)
-    if (!isPasswordChanged.ok) {
-        res
-            .status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-            .json({
-                success: false,
-                error: isPasswordChanged.message
-            })
-        return
+    try {
+        const passwordChanged = await authModels.changePassword(email, newPassword)
+
+        res.statusCode = 200
+        res.json({
+            success: true,
+            message: passwordChanged.message
+        })
+
+    } catch {
+
+        res.statusCode = 500
+        res.json({
+            success: false,
+            error: passwordChanged.message
+        })
     }
 
-    res
-        .status(constants.HTTP_STATUS_OK)
-        .json({
-            success: true,
-            message: isPasswordChanged.message
-        })
 }
