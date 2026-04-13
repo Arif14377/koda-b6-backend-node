@@ -7,5 +7,6 @@ const cartRouter = Router()
 cartRouter.use(authMiddleware)
 
 cartRouter.get('/', cartControllers.getCart)
+cartRouter.post('/', cartControllers.addToCart)
 
 export default cartRouter
