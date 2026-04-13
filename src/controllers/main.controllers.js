@@ -20,6 +20,28 @@ export async function getAllProducts(req, res) {
     }
 }
 
+export async function getProductById(req, res) {
+    const {id} = req.params
+
+    try {
+        const product = await mainModels.getProductById(id)
+
+        res.statusCode = 200
+        res.json({
+            success: true,
+            message: "Data product:",
+            results: product
+        })
+    } catch (error) {
+        console.error(error.message)
+        res.statuCode = 500
+        res.json({
+            success: false,
+            error: "Failed to get the product"
+        })
+    }
+}
+
 export async function getReviews(req, res) {
     try {
         const reviews = await mainModels.getReviews()

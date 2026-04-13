@@ -15,6 +15,66 @@ export async function getAllProducts() {
     return dataProducts.rows
 }
 
+export async function getProductById(productId) {
+    try {
+        // fetch data product
+        const textProduct = `
+            SELECT id, name, description, quantity, price, rating, old_price, is_flash_sale
+            FROM products
+            WHERE id = $1
+        `
+
+        const rowsProduct = await db.query(textProduct, [productId])
+
+        if (rowsProduct.rowCount === 0) {
+            throw new Error("Produk tidak ditemukan.")
+        }
+
+        const product = rowsProduct.rows[0]
+
+        // fetch images
+        const textImages = `
+            SELECT id, product_id, path FROM product_images WHERE product_id = $1
+        `
+        
+        const rowsImages = await db.query(textImages, [productId])
+        product.images = rowsImages.rows
+
+         // fetch variants
+        const textVariants = `
+            SELECT id, name, add_price FROM product_variant WHERE product_id = $1
+        `
+        const rowsVariants = await db.query(textVariants, [productId])
+        product.variants = rowsVariants.rows
+ 
+        // fetch sizes
+        const textSizes = `
+            SELECT id, name, add_price FROM product_size WHERE product_id = $1
+        `
+        const rowsSizes = await db.query(textSizes, [productId])
+        product.sizes = rowsSizes.rows
+
+        // fetch categories
+        const textCategories = `
+            SELECT c.name 
+            FROM categories c 
+            JOIN product_category pc ON pc.category_id = c.id 
+            WHERE pc.product_id = $1
+        `
+
+        const rowsCategories = await db.query(textCategories, [productId])
+        product.categories = rowsCategories.rows
+
+        return product
+    } catch (error) {
+        console.error("Error while get products data")
+        throw new Error(error.message)
+    }
+
+
+
+}
+
 export async function getReviews() {
     const text=`
         SELECT users.full_name, reviews.messages, reviews.rating, users.picture
