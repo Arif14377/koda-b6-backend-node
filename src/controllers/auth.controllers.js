@@ -182,12 +182,12 @@ export async function changePassword(req, res) {
             message: passwordChanged.message
         })
 
-    } catch {
+    } catch (error) {
 
         res.statusCode = 500
         res.json({
             success: false,
-            error: passwordChanged.message
+            error: error.message
         })
     }
 
