@@ -7,6 +7,6 @@ authRouter.post('/register', authController.register)
 authRouter.post('/login', authController.login)
 authRouter.post('/forgot-password', authController.generateOTP)
 authRouter.post('/forgot-password/verification-otp', authController.verificationOTP)
-// authRouter.post('/forgot-password/changePassword', authController.changePassword)
+authRouter.patch('/forgot-password/change-password', authController.changePassword)
 
 export default authRouter
