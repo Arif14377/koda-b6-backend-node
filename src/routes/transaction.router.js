@@ -8,6 +8,6 @@ transactionRouter.use(authMiddleware)
 
 transactionRouter.get('/', transactionControllers.getHistory)
 transactionRouter.get('/:id', transactionControllers.getDetail)
-// transactionRouter.post('/', transactionControllers.checkout)
+transactionRouter.post('/', transactionControllers.checkout)
 
 export default transactionRouter
