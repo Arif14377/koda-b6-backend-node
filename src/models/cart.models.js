@@ -47,3 +47,19 @@ export async function addToCart(userId, cartData) {
         throw new Error("Failed to add product to cart: " + error.message)
     }
 }
+
+export async function updateQuantity(cartId, userId, quantity) {
+    const text = `
+        UPDATE cart SET quantity = $1
+        WHERE id = $2 AND user_id = $3
+    `
+
+    try {
+        const result = await db.query(text, [quantity, cartId, userId])
+        if (result.rowCount === 0) {
+            throw new Error("Cart item not found.")
+        }
+    } catch (error) {
+        throw new Error("Failed to update: " + error.message)
+    }
+}

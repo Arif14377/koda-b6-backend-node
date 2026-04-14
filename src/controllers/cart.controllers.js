@@ -52,3 +52,35 @@ export async function addToCart(req, res) {
         })
     }
 }
+
+export async function updateQuantity(req, res) {
+    const userId = req.userId
+    const { id } = req.params
+    const { quantity } = req.body
+
+    if (!quantity) {
+        res.statusCode = 400
+        res.json({
+            success: false,
+            error: "Quantity is required."
+        })
+        return
+    }
+
+    try {
+        await cartModels.updateQuantity(parseInt(id), userId, quantity)
+
+        res.statusCode = 200
+        res.json({
+            success: true,
+            message: "Successfully update quantity."
+        })
+    } catch (error) {
+        console.error(error.message)
+        res.statusCode = 500
+        res.json({
+            success: false,
+            error: "There was an error on the server."
+        })
+    }
+}
