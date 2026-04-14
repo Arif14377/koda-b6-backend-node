@@ -63,3 +63,18 @@ export async function updateQuantity(cartId, userId, quantity) {
         throw new Error("Failed to update: " + error.message)
     }
 }
+
+export async function removeFromCart(cartId, userId) {
+    const text = `
+        DELETE FROM cart WHERE id = $1 AND user_id = $2
+    `
+
+    try {
+        const result = await db.query(text, [cartId, userId])
+        if (result.rowCount === 0) {
+            throw new Error("Cart item not found.")
+        }
+    } catch (error) {
+        throw new Error("Failed to remove item from cart: " + error.message)
+    }
+}

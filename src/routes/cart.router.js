@@ -9,5 +9,6 @@ cartRouter.use(authMiddleware)
 cartRouter.get('/', cartControllers.getCart)
 cartRouter.post('/', cartControllers.addToCart)
 cartRouter.patch('/:id', cartControllers.updateQuantity)
+cartRouter.delete('/:id', cartControllers.removeFromCart)
 
 export default cartRouter

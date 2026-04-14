@@ -84,3 +84,25 @@ export async function updateQuantity(req, res) {
         })
     }
 }
+
+export async function removeFromCart(req, res) {
+    const userId = req.userId
+    const { id } = req.params
+
+    try {
+        await cartModels.removeFromCart(parseInt(id), userId)
+
+        res.statusCode = 200
+        res.json({
+            success: true,
+            message: "Item successfully removed from cart."
+        })
+    } catch (error) {
+        console.error(error.message)
+        res.statusCode = 500
+        res.json({
+            success: false,
+            error: "There was an error on server."
+        })
+    }
+}
