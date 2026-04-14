@@ -21,3 +21,14 @@ export async function getHistoryByUserId(userId) {
         throw new Error("Failed to get history transaction: " + error.message)
     }
 }
+
+export async function getDeliveryMethods() {
+    const text = `SELECT id, name, price FROM delivery_methods ORDER BY id`
+
+    try {
+        const result = await db.query(text)
+        return result.rows
+    } catch (error) {
+        throw new Error("Failed to get shipping method: " + error.message)
+    }
+}

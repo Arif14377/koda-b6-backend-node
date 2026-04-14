@@ -4,8 +4,6 @@ import { authMiddleware } from '../middleware/auth.middleware.js'
 
 const transactionRouter = Router()
 
-// transactionRouter.get('/delivery-methods', transactionControllers.getDeliveryMethods)
-
 transactionRouter.use(authMiddleware)
 
 transactionRouter.get('/', transactionControllers.getHistory)
