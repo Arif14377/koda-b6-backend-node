@@ -5,5 +5,6 @@ const mainRouter = Router()
 
 mainRouter.get('/products', mainControllers.getAllProducts)
 mainRouter.get('/reviews', mainControllers.getReviews)
+mainRouter.get('/products/:id', mainControllers.getProductById)
 
 export default mainRouter

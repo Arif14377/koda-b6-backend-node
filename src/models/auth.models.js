@@ -128,12 +128,12 @@ export async function verificationOTP(email, otp) {
     try {
         const forgotUser = await db.query(text, [email])
         if (forgotUser.rowCount == 0) {
-            throw new Error("Error while verify otp.")
+            throw new Error("Email not found.")
         }
 
         // jika otp tidak sesuai
-        console.log("from table: ", forgotUser.rows[0].code)
-        console.log("from body: ", otp)
+        // console.log("from table: ", forgotUser.rows[0].code)
+        // console.log("from body: ", otp)
         if (forgotUser.rows[0].code !== otp) {
             throw new Error("Invalid OTP code.")
         }
@@ -148,7 +148,7 @@ export async function verificationOTP(email, otp) {
 
     } catch (error) {
         console.error(error.message)
-        return
+        throw error
     }
 }
 
