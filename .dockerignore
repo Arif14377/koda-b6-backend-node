@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env*
+
+# Version control
+.git*
+
+# IDE and editor files
+.vscode/
+
+# Docker files (optional, but can be excluded if not needed in image)
+Dockerfile*
+.dockerignore
+
+# Documentation (optional)
+README.md
+NOTES.md
