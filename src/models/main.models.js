@@ -11,7 +11,7 @@ export async function getAllProducts() {
     `
 
     const dataProducts = await db.query(text)
-    console.log(dataProducts)
+    // console.log(dataProducts)
     return dataProducts.rows
 }
 

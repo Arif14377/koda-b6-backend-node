@@ -2,7 +2,7 @@ import * as authModels from '../models/auth.models.js'
 
 export async function register(req, res) {
     const dataRegistration = req.body
-    console.log("dataRegister: ", dataRegistration)
+    // console.log("dataRegister: ", dataRegistration)
 
     // Cek apakah format email benar
     if (!dataRegistration.email.includes("@")) {
@@ -34,7 +34,7 @@ export async function register(req, res) {
 
     try {
         const result = await authModels.register(dataUser)
-        console.log(result)
+        // console.log(result)
         
         if (result.code == 200) {
             res.statusCode = 200
@@ -150,7 +150,7 @@ export async function verificationOTP(req, res) {
     const {email, otp} = req.body
 
     try {
-        console.log("from body controllers: ", otp)
+        // console.log("from body controllers: ", otp)
         const OTPValid = await authModels.verificationOTP(email, parseInt(otp))
 
         if (OTPValid.ok) {

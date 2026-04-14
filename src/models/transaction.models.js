@@ -23,7 +23,7 @@ export async function getHistoryByUserId(userId) {
 }
 
 export async function getDeliveryMethods() {
-    const text = `SELECT id, name, price FROM delivery_methods ORDER BY id`
+    const text = `SELECT id, name, price FROM delivery_methods ORDER BY id ASC`
 
     try {
         const result = await db.query(text)
