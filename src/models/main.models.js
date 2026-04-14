@@ -2,7 +2,7 @@ import * as db from '../../db/index.js'
 
 export async function getAllProducts() {
     const text = `
-        SELECT p.id, p.name, p.description, p.quantity, p.price, p.rating, p.old_price, p.is_flash_sale,
+        SELECT p.id, p.name, p.description, p.quantity, p.price, p.rating, p.old_price as "oldPrice", p.is_flash_sale,
             COALESCE((SELECT path FROM product_images WHERE product_id = p.id LIMIT 1), '') as image,
             COALESCE((SELECT string_agg(c.name, ',') FROM categories c JOIN product_category pc ON pc.category_id = c.id WHERE pc.product_id = p.id), '') as categories_list,
             COALESCE((SELECT json_agg(json_build_object('id', id, 'name', name, 'addPrice', add_price)) FROM product_variant WHERE product_id = p.id), '[]') as variants,
@@ -19,7 +19,7 @@ export async function getProductById(productId) {
     try {
         // fetch data product
         const textProduct = `
-            SELECT id, name, description, quantity, price, rating, old_price, is_flash_sale
+            SELECT id, name, description, quantity, price, rating, old_price as "oldPrice", is_flash_sale
             FROM products
             WHERE id = $1
         `
@@ -42,14 +42,14 @@ export async function getProductById(productId) {
 
          // fetch variants
         const textVariants = `
-            SELECT id, name, add_price FROM product_variant WHERE product_id = $1
+            SELECT id, name, add_price as "addPrice" FROM product_variant WHERE product_id = $1
         `
         const rowsVariants = await db.query(textVariants, [productId])
         product.variants = rowsVariants.rows
  
         // fetch sizes
         const textSizes = `
-            SELECT id, name, add_price FROM product_size WHERE product_id = $1
+            SELECT id, name, add_price as "addPrice" FROM product_size WHERE product_id = $1
         `
         const rowsSizes = await db.query(textSizes, [productId])
         product.sizes = rowsSizes.rows
