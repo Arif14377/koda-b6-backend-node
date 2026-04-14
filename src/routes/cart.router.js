@@ -10,5 +10,6 @@ cartRouter.get('/', cartControllers.getCart)
 cartRouter.post('/', cartControllers.addToCart)
 cartRouter.patch('/:id', cartControllers.updateQuantity)
 cartRouter.delete('/:id', cartControllers.removeFromCart)
+cartRouter.delete('/', cartControllers.clearCart)
 
 export default cartRouter

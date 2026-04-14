@@ -106,3 +106,24 @@ export async function removeFromCart(req, res) {
         })
     }
 }
+
+export async function clearCart(req, res) {
+    const userId = req.userId
+
+    try {
+        await cartModels.clearCart(userId)
+
+        res.statusCode = 200
+        res.json({
+            success: true,
+            message: "Cart successfully emptied."
+        })
+    } catch (error) {
+        console.error(error.message)
+        res.statusCode = 500
+        res.json({
+            success: false,
+            error: "There was an error on the server."
+        })
+    }
+}

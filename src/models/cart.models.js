@@ -78,3 +78,15 @@ export async function removeFromCart(cartId, userId) {
         throw new Error("Failed to remove item from cart: " + error.message)
     }
 }
+
+export async function clearCart(userId) {
+    const text = `
+        DELETE FROM cart WHERE user_id = $1
+    `
+
+    try {
+        await db.query(text, [userId])
+    } catch (error) {
+        throw new Error("Failed to empty cart: " + error.message)
+    }
+}
