@@ -22,9 +22,28 @@ export async function getHistory(req, res) {
     }
 }
 
-// export async function getDetail() {
+export async function getDetail(req, res) {
+    const userId = req.userId
+    const { id } = req.params
 
-// }
+    try {
+        const transaction = await transactionModels.getTransactionById(parseInt(id), userId)
+
+        res.statusCode = 200
+        res.json({
+            success: true,
+            message: "Successfully to get transaction detail.",
+            results: transaction
+        })
+    } catch (error) {
+        console.error(error.message)
+        res.statusCode = 404
+        res.json({
+            success: false,
+            error: error.message
+        })
+    }
+}
 
 export async function getDeliveryMethods(req, res) {
     try {

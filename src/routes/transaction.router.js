@@ -7,7 +7,7 @@ const transactionRouter = Router()
 transactionRouter.use(authMiddleware)
 
 transactionRouter.get('/', transactionControllers.getHistory)
-// transactionRouter.get('/:id', transactionControllers.getDetail)
+transactionRouter.get('/:id', transactionControllers.getDetail)
 // transactionRouter.post('/', transactionControllers.checkout)
 
 export default transactionRouter
