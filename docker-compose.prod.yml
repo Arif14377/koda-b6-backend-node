@@ -1,21 +1,21 @@
 # docker-compose.prod.yml (Production)
 services:
   # Nginx + Frontend Static Files
-  nginx:
-    image: ghcr.io/arif14377/koda-b6-frontend:${FRONTEND_IMAGE_TAG:-latest}
-    container_name: web-arif
-    restart: always
-    ports:
-      - "20101:80"
-    depends_on:
-      - backend
-    networks:
-      - pman_web
+  # nginx:
+  #   image: ghcr.io/arif14377/koda-b6-frontend:${FRONTEND_IMAGE_TAG:-latest}
+  #   container_name: web-arif
+  #   restart: always
+  #   ports:
+  #     - "20101:80"
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - pman_web
 
   # Backend (Node.js — menggantikan backend-go)
   backend:
     image: ghcr.io/arif14377/koda-b6-backend-node:${BACKEND_NODE_IMAGE_TAG:-latest}
-    container_name: backend-arif-nodejs
+    container_name: backend-arif-node
     restart: always
     ports:
       - "20105:8888"
