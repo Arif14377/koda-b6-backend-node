@@ -1,24 +1,15 @@
 import * as cartModels from '../models/cart.models.js'
+import { constants } from "node:http2"
+import { sendSuccess, sendBadRequest, sendServerError } from '../lib/errorHandler.js'
 
 export async function getCart(req, res) {
     const userId = req.userId
 
     try {
         const cart = await cartModels.getCartByUserId(userId)
-
-        res.statusCode = 200
-        res.json({
-            success: true,
-            message: "Cart data successfully retrieved..",
-            results: cart
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Cart data successfully retrieved.", cart)
     } catch (error) {
-        console.error(error.message)
-        res.statusCode = 500
-        res.json({
-            success: false,
-            error: "There was an error on the server."
-        })
+        return sendServerError(res, error)
     }
 }
 
@@ -27,29 +18,14 @@ export async function addToCart(req, res) {
     const cartData = req.body
 
     if (!cartData.productId || !cartData.quantity) {
-        res.statusCode = 400
-        res.json({
-            success: false,
-            error: "product id and quantity is required."
-        })
-        return
+        return sendBadRequest(res, "product id and quantity is required.")
     }
 
     try {
         await cartModels.addToCart(userId, cartData)
-
-        res.statusCode = 201
-        res.json({
-            success: true,
-            message: "Product successfully added to cart."
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_CREATED, "Product successfully added to cart.")
     } catch (error) {
-        console.error(error.message)
-        res.statusCode = 500
-        res.json({
-            success: false,
-            error: "There was an error on the server."
-        })
+        return sendServerError(res, error)
     }
 }
 
@@ -59,29 +35,14 @@ export async function updateQuantity(req, res) {
     const { quantity } = req.body
 
     if (!quantity) {
-        res.statusCode = 400
-        res.json({
-            success: false,
-            error: "Quantity is required."
-        })
-        return
+        return sendBadRequest(res, "Quantity is required.")
     }
 
     try {
         await cartModels.updateQuantity(parseInt(id), userId, quantity)
-
-        res.statusCode = 200
-        res.json({
-            success: true,
-            message: "Successfully update quantity."
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Successfully update quantity.")
     } catch (error) {
-        console.error(error.message)
-        res.statusCode = 500
-        res.json({
-            success: false,
-            error: "There was an error on the server."
-        })
+        return sendServerError(res, error)
     }
 }
 
@@ -91,19 +52,9 @@ export async function removeFromCart(req, res) {
 
     try {
         await cartModels.removeFromCart(parseInt(id), userId)
-
-        res.statusCode = 200
-        res.json({
-            success: true,
-            message: "Item successfully removed from cart."
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Item successfully removed from cart.")
     } catch (error) {
-        console.error(error.message)
-        res.statusCode = 500
-        res.json({
-            success: false,
-            error: "There was an error on server."
-        })
+        return sendServerError(res, error)
     }
 }
 
@@ -112,18 +63,8 @@ export async function clearCart(req, res) {
 
     try {
         await cartModels.clearCart(userId)
-
-        res.statusCode = 200
-        res.json({
-            success: true,
-            message: "Cart successfully emptied."
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Cart successfully emptied.")
     } catch (error) {
-        console.error(error.message)
-        res.statusCode = 500
-        res.json({
-            success: false,
-            error: "There was an error on the server."
-        })
+        return sendServerError(res, error)
     }
 }
