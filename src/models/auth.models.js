@@ -154,7 +154,7 @@ export async function verificationOTP(email, otp) {
 
 export async function changePassword(email, newPassword) {
     try{
-        console.log("tipe new password: ", typeof(newPassword))
+        // console.log("tipe new password: ", typeof(newPassword))
         const hashPassword = await hash.generateHash(newPassword)
 
         const text = `

@@ -1,6 +1,20 @@
 import * as db from '../../db/index.js'
+import redisClient from '../../db/redis.js'
+
+const CACHE_TTL = 60 * 5 // 5 menit
 
 export async function getAllProducts() {
+    const cacheKey = 'products:all'
+
+    // Ambil dari Redis dulu
+    const cached = await redisClient.get(cacheKey)
+    if (cached) {
+        console.log('[Cache HIT] getAllProducts')
+        return JSON.parse(cached)
+    }
+
+    // Redis kosong, ambil dari DB
+    console.log('[Cache MISS] getAllProducts — fetch from DB')
     const text = `
         SELECT p.id, p.name, p.description, p.quantity, p.price, p.rating, p.old_price as "oldPrice", p.is_flash_sale,
             COALESCE((SELECT path FROM product_images WHERE product_id = p.id LIMIT 1), '') as image,
@@ -11,8 +25,12 @@ export async function getAllProducts() {
     `
 
     const dataProducts = await db.query(text)
-    // console.log(dataProducts)
-    return dataProducts.rows
+    const rows = dataProducts.rows
+
+    // Simpan ke Redis
+    await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(rows))
+
+    return rows
 }
 
 export async function getProductById(productId) {
@@ -70,23 +88,35 @@ export async function getProductById(productId) {
         console.error("Error while get products data")
         throw new Error(error.message)
     }
-
-
-
 }
 
 export async function getReviews() {
-    const text=`
+    const cacheKey = 'reviews:all'
+
+    // Ambil dari Redis dulu
+    const cached = await redisClient.get(cacheKey)
+    if (cached) {
+        console.log('[Cache HIT] getReviews')
+        return JSON.parse(cached)
+    }
+
+    // Redis kosong, ambil dari DB
+    console.log('[Cache MISS] getReviews — fetch from DB')
+    const text = `
         SELECT users.full_name, reviews.messages, reviews.rating, users.picture
-		FROM reviews
-		INNER JOIN users ON reviews.user_id = users.id
+        FROM reviews
+        INNER JOIN users ON reviews.user_id = users.id
     `
 
     try {
         const reviews = await db.query(text)
-        return reviews.rows
+        const rows = reviews.rows
+
+        // Simpan ke Redis
+        await redisClient.setEx(cacheKey, CACHE_TTL, JSON.stringify(rows))
+
+        return rows
     } catch(error) {
-        throw new Error("Failed to get reviews data: ", error.message)
+        throw new Error("Failed to get reviews data: " + error.message)
     }
-    
 }
