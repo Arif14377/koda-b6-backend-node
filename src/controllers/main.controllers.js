@@ -1,11 +1,12 @@
 import * as mainModels from '../models/main.models.js'
+import { constants } from "node:http2"
 
 export async function getAllProducts(req, res) {
     try {
         const dataProducts = await mainModels.getAllProducts()
         // console.log("data products: ", dataProducts)
 
-        res.statuCode = 200
+        res.status(constants.HTTP_STATUS_OK)
         res.json({
             success: true,
             message: "List data products",
@@ -13,7 +14,8 @@ export async function getAllProducts(req, res) {
         })
     } catch (error) {
         console.error(error.message)
-        res.status(500).json({
+        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+        res.json({
             success: false,
             error: "Failed to get data products"
         })
@@ -26,7 +28,7 @@ export async function getProductById(req, res) {
     try {
         const product = await mainModels.getProductById(id)
 
-        res.statusCode = 200
+        res.status(constants.HTTP_STATUS_OK)
         res.json({
             success: true,
             message: "Data product:",
@@ -34,7 +36,7 @@ export async function getProductById(req, res) {
         })
     } catch (error) {
         console.error(error.message)
-        res.statuCode = 500
+        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
         res.json({
             success: false,
             error: "Failed to get the product"
@@ -47,14 +49,14 @@ export async function getReviews(req, res) {
         const reviews = await mainModels.getReviews()
         // console.log(reviews)
 
-        res.statuCode = 200
+        res.status(constants.HTTP_STATUS_OK)
         res.json({
             success: true,
             message: "List reviews data",
             results: reviews
         })
     } catch (error) {
-        res.statusCode = 500
+        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
         res.json({
             success: false,
             error: error.message

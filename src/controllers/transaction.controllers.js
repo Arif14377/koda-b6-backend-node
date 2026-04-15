@@ -1,4 +1,5 @@
 import * as transactionModels from '../models/transaction.models.js'
+import { constants } from 'node:http2'
 
 export async function getHistory(req, res) {
     const userId = req.userId
@@ -6,7 +7,7 @@ export async function getHistory(req, res) {
     try {
         const history = await transactionModels.getHistoryByUserId(userId)
 
-        res.statusCode = 200
+        res.status(constants.HTTP_STATUS_OK)
         res.json({
             success: true,
             message: "Successfully to get transaction history.",
@@ -14,7 +15,7 @@ export async function getHistory(req, res) {
         })
     } catch (error) {
         console.error(error.message)
-        res.statusCode = 500
+        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
         res.json({
             success: false,
             error: "There was an error on the server."
@@ -29,7 +30,7 @@ export async function getDetail(req, res) {
     try {
         const transaction = await transactionModels.getTransactionById(parseInt(id), userId)
 
-        res.statusCode = 200
+        res.status(constants.HTTP_STATUS_OK)
         res.json({
             success: true,
             message: "Successfully to get transaction detail.",
@@ -37,7 +38,7 @@ export async function getDetail(req, res) {
         })
     } catch (error) {
         console.error(error.message)
-        res.statusCode = 404
+        res.status(constants.HTTP_STATUS_NOT_FOUND)
         res.json({
             success: false,
             error: error.message
@@ -49,7 +50,7 @@ export async function getDeliveryMethods(req, res) {
     try {
         const methods = await transactionModels.getDeliveryMethods()
 
-        res.statusCode = 200
+        res.status(constants.HTTP_STATUS_OK)
         res.json({
             success: true,
             message: "Successfully to get shipping method.",
@@ -57,7 +58,7 @@ export async function getDeliveryMethods(req, res) {
         })
     } catch (error) {
         console.error(error.message)
-        res.statusCode = 500
+        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
         res.json({
             success: false,
             error: "There was an error on the server."
@@ -70,7 +71,7 @@ export async function checkout(req, res) {
     const trxData = req.body
 
     if (!trxData.delivery_method || !trxData.full_name || !trxData.email || !trxData.address || !trxData.sub_total || !trxData.tax || !trxData.total || !trxData.payment_method) {
-        res.statusCode = 400
+        res.status(constants.HTTP_STATUS_BAD_REQUEST)
         res.json({
             success: false,
             error: "Input tidak valid"
@@ -81,14 +82,14 @@ export async function checkout(req, res) {
     try {
         await transactionModels.checkout(userId, trxData)
 
-        res.statusCode = 201
+        res.status(constants.HTTP_STATUS_CREATED)
         res.json({
             success: true,
             message: "Checkout berhasil."
         })
     } catch (error) {
         console.error(error.message)
-        res.statusCode = 500
+        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
         res.json({
             success: false,
             error: "Ada kesalahan pada server."

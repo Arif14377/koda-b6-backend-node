@@ -5,7 +5,7 @@ export function authMiddleware(req, res, next) {
 
     if (!authHeader) {
         console.error("Authorization required.")
-        res.statusCode = 401
+        res.status(constants.HTTP_STATUS_UNAUTHORIZED)
         res.json({
             success: false,
             error: "Access is denied due to invalid credentials."
@@ -16,7 +16,7 @@ export function authMiddleware(req, res, next) {
     const parts = authHeader.split(' ')
         if (parts.length !== 2 || parts[0] !== 'Bearer') {
         console.error("Invalid token format.")
-        res.statusCode = 401
+        res.status(constants.HTTP_STATUS_UNAUTHORIZED)
         res.json({
             success: false,
             error: "Access is denied due to invalid credentials."
@@ -32,7 +32,7 @@ export function authMiddleware(req, res, next) {
         next()
     } catch (error) {
         console.error("invalid or expired token")
-        res.statusCode = 401
+        res.status(constants.HTTP_STATUS_UNAUTHORIZED)
         res.json({
             success: false,
             error: "Access is denied due to invalid credentials."

@@ -31,7 +31,7 @@ export async function register(dataUser) {
     
     const results = {
         message: "Registrasi berhasil",
-        code: 200
+        code: 201
     }
     
     return results
