@@ -1,7 +1,7 @@
 import * as transactionModels from '../models/transaction.models.js'
 
 export async function getHistory(req, res) {
-        const userId = req.userId
+    const userId = req.userId
 
     try {
         const history = await transactionModels.getHistoryByUserId(userId)
@@ -65,7 +65,33 @@ export async function getDeliveryMethods(req, res) {
     }
 }
 
+export async function checkout(req, res) {
+    const userId = req.userId
+    const trxData = req.body
 
-// export async function checkout() {
+    if (!trxData.delivery_method || !trxData.full_name || !trxData.email || !trxData.address || !trxData.sub_total || !trxData.tax || !trxData.total || !trxData.payment_method) {
+        res.statusCode = 400
+        res.json({
+            success: false,
+            error: "Input tidak valid"
+        })
+        return
+    }
 
-// }
+    try {
+        await transactionModels.checkout(userId, trxData)
+
+        res.statusCode = 201
+        res.json({
+            success: true,
+            message: "Checkout berhasil."
+        })
+    } catch (error) {
+        console.error(error.message)
+        res.statusCode = 500
+        res.json({
+            success: false,
+            error: "Ada kesalahan pada server."
+        })
+    }
+}

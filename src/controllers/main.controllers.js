@@ -3,7 +3,7 @@ import * as mainModels from '../models/main.models.js'
 export async function getAllProducts(req, res) {
     try {
         const dataProducts = await mainModels.getAllProducts()
-        console.log("data products: ", dataProducts)
+        // console.log("data products: ", dataProducts)
 
         res.statuCode = 200
         res.json({
@@ -45,7 +45,7 @@ export async function getProductById(req, res) {
 export async function getReviews(req, res) {
     try {
         const reviews = await mainModels.getReviews()
-        console.log(reviews)
+        // console.log(reviews)
 
         res.statuCode = 200
         res.json({
