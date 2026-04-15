@@ -15,7 +15,7 @@ services:
   # Backend (Node.js — menggantikan backend-go)
   backend:
     image: ghcr.io/arif14377/koda-b6-backend-node:${BACKEND_NODE_IMAGE_TAG:-latest}
-    container_name: backend-arif
+    container_name: backend-arif-node
     restart: always
     ports:
       - "20105:8888"
