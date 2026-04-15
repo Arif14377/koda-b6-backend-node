@@ -6,6 +6,7 @@ import cartRouter from './src/routes/cart.router.js'
 import transactionRouter from './src/routes/transaction.router.js'
 import corsMiddleware from './src/middleware/cors.js'
 import { getDeliveryMethods } from './src/controllers/transaction.controllers.js'
+import adminUserRouter from './src/routes/admin/admin.user.router.js'
 
 const app = express()
 const port = process.env.PORT
@@ -19,6 +20,9 @@ app.use('/auth', authRouter)
 app.use('/cart', cartRouter)
 app.use('/history', transactionRouter)
 app.get('/delivery-methods', getDeliveryMethods)
+
+// router admin
+app.use('/admin', adminUserRouter)
 
 // test
 app.get('/', (req, res) => {
