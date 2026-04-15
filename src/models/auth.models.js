@@ -68,6 +68,7 @@ export async function login(dataLogin) {
         id: data.id,
         fullName: data.full_name,
         email: data.email,
+        roleId: data.role_id
     }
 
     const isPasswordTrue = await hash.verifyHash(data.password, dataLogin.password)
@@ -82,7 +83,7 @@ export async function login(dataLogin) {
     // jika benar -> re        // const dataResponse = turn 200 + data
     if (isPasswordTrue) {
         // create jwt
-        const token = jwt.sign({userId: data.id}, process.env.JWT_SECRET, {expiresIn: '1h'})
+        const token = jwt.sign({userId: data.id, userRole: data.role_id}, process.env.JWT_SECRET, {expiresIn: '1h'})
 
         return {
             message: "Successfully loged in.",
