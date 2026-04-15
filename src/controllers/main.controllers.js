@@ -1,24 +1,13 @@
 import * as mainModels from '../models/main.models.js'
 import { constants } from "node:http2"
+import { sendSuccess, sendServerError } from '../lib/errorHandler.js'
 
 export async function getAllProducts(req, res) {
     try {
         const dataProducts = await mainModels.getAllProducts()
-        // console.log("data products: ", dataProducts)
-
-        res.status(constants.HTTP_STATUS_OK)
-        res.json({
-            success: true,
-            message: "List data products",
-            results: dataProducts
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "List data products", dataProducts)
     } catch (error) {
-        console.error(error.message)
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: "Failed to get data products"
-        })
+        return sendServerError(res, error)
     }
 }
 
@@ -27,39 +16,17 @@ export async function getProductById(req, res) {
 
     try {
         const product = await mainModels.getProductById(id)
-
-        res.status(constants.HTTP_STATUS_OK)
-        res.json({
-            success: true,
-            message: "Data product:",
-            results: product
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Data product:", product)
     } catch (error) {
-        console.error(error.message)
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: "Failed to get the product"
-        })
+        return sendServerError(res, error)
     }
 }
 
 export async function getReviews(req, res) {
     try {
         const reviews = await mainModels.getReviews()
-        // console.log(reviews)
-
-        res.status(constants.HTTP_STATUS_OK)
-        res.json({
-            success: true,
-            message: "List reviews data",
-            results: reviews
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "List reviews data", reviews)
     } catch (error) {
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: error.message
-        })
+        return sendServerError(res, error)
     }
 }

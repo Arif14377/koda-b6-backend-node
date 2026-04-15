@@ -1,5 +1,6 @@
 import * as userModels from '../models/user.models.js'
 import { constants } from "node:http2"
+import { sendSuccess, sendBadRequest, sendServerError } from '../lib/errorHandler.js'
 
 export async function updateProfile(req, res) {
     const userId = req.userId
@@ -7,12 +8,7 @@ export async function updateProfile(req, res) {
 
     // Validation
     if (!fullName && !phone && !address) {
-        res.status(constants.HTTP_STATUS_BAD_REQUEST)
-        res.json({
-            success: false,
-            error: "At least one field is required to update (fullName, phone, address)."
-        })
-        return
+        return sendBadRequest(res, "At least one field is required to update (fullName, phone, address).")
     }
 
     try {
@@ -22,18 +18,9 @@ export async function updateProfile(req, res) {
             address
         })
 
-        res.status(constants.HTTP_STATUS_OK)
-        res.json({
-            success: true,
-            message: "Profile updated successfully.",
-            results: updatedProfile
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Profile updated successfully.", updatedProfile)
     } catch (error) {
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: error.message
-        })
+        return sendServerError(res, error)
     }
 }
 
@@ -42,12 +29,7 @@ export async function uploadProfilePicture(req, res) {
 
     try {
         if (!req.file) {
-            res.status(constants.HTTP_STATUS_BAD_REQUEST)
-            res.json({
-                success: false,
-                error: "No file uploaded. Make sure to send file with field name 'picture' and Content-Type 'multipart/form-data'"
-            })
-            return
+            return sendBadRequest(res, "No file uploaded. Make sure to send file with field name 'picture' and Content-Type 'multipart/form-data'")
         }
 
         // Get the file path relative to the public folder
@@ -56,18 +38,9 @@ export async function uploadProfilePicture(req, res) {
         // Update profile picture in database
         const updatedProfile = await userModels.uploadProfilePicture(userId, picturePath)
 
-        res.status(constants.HTTP_STATUS_OK)
-        res.json({
-            success: true,
-            message: "Profile picture uploaded successfully.",
-            results: updatedProfile
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Profile picture uploaded successfully.", updatedProfile)
     } catch (error) {
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: error.message
-        })
+        return sendServerError(res, error)
     }
 }
 
@@ -76,18 +49,8 @@ export async function getProfile(req, res) {
 
     try {
         const profile = await userModels.getProfile(userId)
-
-        res.status(constants.HTTP_STATUS_OK)
-        res.json({
-            success: true,
-            message: "Profile fetched successfully.",
-            results: profile
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Profile fetched successfully.", profile)
     } catch (error) {
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: error.message
-        })
+        return sendServerError(res, error)
     }
 }

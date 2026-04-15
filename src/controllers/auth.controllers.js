@@ -1,29 +1,18 @@
 import * as authModels from '../models/auth.models.js'
 import { constants } from "node:http2"
+import { sendSuccess, sendBadRequest, sendUnauthorized, sendConflict, sendServerError } from '../lib/errorHandler.js'
 
 export async function register(req, res) {
     const dataRegistration = req.body
-    // console.log("dataRegister: ", dataRegistration)
 
     // Cek apakah format email benar
     if (!dataRegistration.email.includes("@")) {
-        res.status(constants.HTTP_STATUS_BAD_REQUEST)
-        res.json({
-            success: false,
-            error: "Format email salah",
-        })
-        return
+        return sendBadRequest(res, "Format email salah")
     }
 
     // Cek apakah password dan confirm password sama
     if (dataRegistration.password !== dataRegistration.confirmPassword) {
-        res.status(constants.HTTP_STATUS_BAD_REQUEST)
-        res.json({
-            success: false,
-            error: "Password tidak sama."
-        })
-
-        return
+        return sendBadRequest(res, "Password tidak sama.")
     }
 
     // Kalau oke, panggil models untuk simpan data
@@ -35,23 +24,13 @@ export async function register(req, res) {
 
     try {
         const result = await authModels.register(dataUser)
-        // console.log(result)
         
         if (result.code == 201) {
-            res.status(constants.HTTP_STATUS_CREATED)
-            res.json({
-                success: true,
-                message: "Registrasi berhasil"
-            })
+            return sendSuccess(res, constants.HTTP_STATUS_CREATED, "Registrasi berhasil")
         }
     } catch(error) {
-        res.status(constants.HTTP_STATUS_CONFLICT)
-        res.json({
-            success: false,
-            error: error.message
-        })
+        return sendConflict(res, error.message)
     }
-
 }
 
 export async function login(req, res) {
@@ -59,12 +38,7 @@ export async function login(req, res) {
 
     // cek format email
     if (!dataLogin.email.includes("@")) {
-        res.status(constants.HTTP_STATUS_BAD_REQUEST)
-        res.json({
-            success: false,
-            error: "Email tidak valid."
-        })
-        return
+        return sendBadRequest(res, "Email tidak valid.")
     }
 
     // Kirim body request untuk dicek di logic models
@@ -72,32 +46,17 @@ export async function login(req, res) {
 
     // jika result.code respon 404, user tidak ditemukan
     if (result.code == 404) {
-        res.status(constants.HTTP_STATUS_UNAUTHORIZED)
-        res.json({
-            success: false,
-            error: result.message
-        })
-        return
+        return sendUnauthorized(res, result.message)
     }
 
     // jika result.code respon 401, password salah
     if (result.code == 401) {
-        res.status(constants.HTTP_STATUS_UNAUTHORIZED)
-        res.json({
-            success: false,
-            error: result.message
-        })
-        return
+        return sendUnauthorized(res, result.message)
     }
 
     // Jika berhasil (result.code == 200), kembalikan data + token
     if (result.code == 200) {
-        res.status(constants.HTTP_STATUS_OK)
-        res.json({
-            success: true,
-            message: "Login berhasil.",
-            results: result.data
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "Login berhasil.", result.data)
     }
 }
 
@@ -106,69 +65,37 @@ export async function generateOTP(req, res) {
 
     // cek format email
     if (!email.includes("@")) {
-        res.status(constants.HTTP_STATUS_BAD_REQUEST)
-        res.json({
-            success: false,
-            error: "Invalid email format."
-        })
-        return
+        return sendBadRequest(res, "Invalid email format.")
     }
 
     // buat otp
-    const OTPGenerated = Math.floor(100000 + Math.random() *900000).toString();
+    const OTPGenerated = Math.floor(100000 + Math.random() * 900000).toString();
     if (!OTPGenerated) {
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: "an error occurred while generating the OTP code."
-        })
-        return
+        return sendServerError(res, new Error("an error occurred while generating the OTP code."))
     }
 
     // save otp di database
     try {
         await authModels.saveOTP(email, OTPGenerated)
-
         console.log(OTPGenerated)
-        res.status(constants.HTTP_STATUS_OK)
-        res.json({
-            success: true,
-            message: "OTP sent successfully (on console)"
-        })
+        return sendSuccess(res, constants.HTTP_STATUS_OK, "OTP sent successfully (on console)")
     } catch (error) {
-        console.error(error.message)
-
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: error.message
-        })
+        return sendServerError(res, error)
     }
-
 }
 
 export async function verificationOTP(req, res) {
     const {email, otp} = req.body
 
     try {
-        // console.log("from body controllers: ", otp)
         const OTPValid = await authModels.verificationOTP(email, parseInt(otp))
 
         if (OTPValid.ok) {
-            res.status(constants.HTTP_STATUS_OK)
-            res.json({
-                success: true,
-                message: OTPValid.message
-            })
+            return sendSuccess(res, constants.HTTP_STATUS_OK, OTPValid.message)
         }
     } catch (error) {
-        res.status(constants.HTTP_STATUS_UNAUTHORIZED)
-        res.json({
-            success: false,
-            error: error.message
-        })
+        return sendUnauthorized(res, error.message)
     }
-    
 }
 
 export async function changePassword(req, res) {
@@ -176,20 +103,8 @@ export async function changePassword(req, res) {
 
     try {
         const passwordChanged = await authModels.changePassword(email, newPassword)
-
-        res.status(constants.HTTP_STATUS_CREATED)
-        res.json({
-            success: true,
-            message: passwordChanged.message
-        })
-
+        return sendSuccess(res, constants.HTTP_STATUS_CREATED, passwordChanged.message)
     } catch (error) {
-
-        res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR)
-        res.json({
-            success: false,
-            error: error.message
-        })
+        return sendServerError(res, error)
     }
-
 }
